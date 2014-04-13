@@ -1,37 +1,38 @@
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include <servo.h>
-
-
-#define LED_PIN 13
-#define CALIB_CNT 1000
-#define MEASUREMENT_CNT 1000
-#define CALIBRATION_TIME 5
-#define MESUREMENT_TIME 5
-#define MOTOR_PIN 9
-#define MOTOR_STOP 1000
-
-
+#include <math.h>
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-    #include "Wire.h"
+	#include "Wire.h"
 #endif
 
-// class default I2C address is 0x68
-// specific I2C addresses may be passed as a parameter here
-// AD0 low = 0x68 (default for InvenSense evaluation board)
-// AD0 high = 0x69
+
+#define LED_PIN 13
+#define CALIBRATION_TIME 5 //Calibration time. Keep sensors still
+#define MESUREMENT_TIME 5 //Time we measuring values
+#define MOTOR_PIN 9 //Motor pin
+#define MOTOR_STOP 1000 //Stops motor and initiates ESC
+#define MOTOR_SPIN 1200 //Choose safe rotations speed. Do not let motor to pull copter into the air
+#define MOTOR_SPIN_UP_TIME 1 //Delay before measurements to let motor spin up
+
+/****************************************************************/
+/*                END OF COFIGURABLE PARAMS                     */
+/****************************************************************/
+
+#define Z_ACC_CONST 16384
+
+void serialPrintSix(int16_t lax,int16_t lay,int16_t laz,int16_t lgx,int16_t lgy,int16_t lgz,bool lln=false);
+
 MPU6050 accelgyro;
-//MPU6050 accelgyro(0x69); // <-- use for AD0 high
 
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
-
 //Sums for average calc
-long sax, say, saz;
-long sgx, sgy, sgz;
+float sax, say, saz;
+float sgx, sgy, sgz;
 
 //Calibrations
 int16_t cax, cay, caz;
@@ -41,39 +42,39 @@ int16_t cgx, cgy, cgz;
 int16_t m_ax, m_ay, m_az;
 int16_t m_gx, m_gy, m_gz;
 
+//average values
+float av_ax, av_ay, av_az;
+float av_gx, av_gy, av_gz;
+
 int16_t rax, ray, raz;
 int16_t rgx, rgy, rgz;
+
 long cnt,m_cnt;
 
 bool is_calibration=true;
 bool is_measurement=false;
-bool dmpReady = false;  // set true if DMP init was successful
+bool dmpReady = false;  
+bool blinkState = false;
 
 unsigned long time=0;	
 
 Servo esc;
+
 String serial_content = "";
 char serial_character;
+
 int motor_pwm;
 
-
-
-bool blinkState = false;
-
 void setup() {
-    // join I2C bus (I2Cdev library doesn't do this automatically)
+    
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif
-
-    // initialize serial communication
-    // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
-    // it's really up to you depending on your project)
+    
     Serial.begin(115200);
-	//while (!Serial); // wait for Leonardo enumeration, others continue immediately
-	
+		
 	Serial.println(F("\nSend any character to begin calibration: "));
 	while (Serial.available() && Serial.read()); // empty buffer
 	while (!Serial.available());                 // wait for data
@@ -123,82 +124,16 @@ void setup() {
 	cnt=0;
 	m_cnt=0;
 	
-	Serial.println("Calibrating");
 }
 
 void loop() {
-	
-	
 	
 	// if programming failed, don't try to do anything
 	if (!dmpReady) return;
 		
 
 	if(is_calibration){
-		time=micros();
-		cnt=0;
-		while(is_calibration){
-
-			// read raw accel/gyro measurements from device
-			accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
-			sax=sax+ax;
-			say=say+ay;
-			saz=saz+az;
-			sgx=sgx+gx;
-			sgy=sgy+gy;
-			sgz=sgz+gz;
-
-			if(cnt%200==0){
-				Serial.print(".");
-			}	
-			
-		
-			if(micros()-time>CALIBRATION_TIME*1000000){
-				is_calibration=false;
-			}
-			cnt++;
-		}
-		
-		/*Serial.println("");
-		Serial.println("Summs:");
-		
-		Serial.print(sax); Serial.print("\t");
-		Serial.print(say); Serial.print("\t");
-		Serial.print(saz); Serial.print("\t");
-		Serial.print(sgx); Serial.print("\t");
-		Serial.print(sgy); Serial.print("\t");
-		Serial.println(sgz);*/
-		
-		Serial.println("");
-		Serial.println("Calibrations:");
-		
-		cax=-1*sax/cnt/8.71;
-		cay=-1*say/cnt/9.03;
-		caz=(16384-saz/cnt)/8.52;
-		
-		cgx=-1*sgx/cnt/3.34;
-		cgy=-1*sgy/cnt/4.11;
-		cgz=-1*sgz/cnt/4.05;
-		
-		
-		Serial.print(cax); Serial.print("\t");
-		Serial.print(cay); Serial.print("\t");
-		Serial.print(caz); Serial.print("\t");
-		Serial.print(cgx); Serial.print("\t");
-		Serial.print(cgy); Serial.print("\t");
-		Serial.println(cgz);
-		
-		accelgyro.setXAccelOffset(cax);
-		accelgyro.setYAccelOffset(cay);
-		accelgyro.setZAccelOffset(caz);
-		
-		accelgyro.setXGyroOffset(cgx);
-		accelgyro.setYGyroOffset(cgy);
-		accelgyro.setZGyroOffset(cgz);
-		
-		cnt++;
-		
+		calibrate();
 	}
 
 	startMeasurement();
@@ -206,6 +141,7 @@ void loop() {
 	if(is_measurement){
 
 		time=micros();
+		
 		m_cnt=0;
 
 		while(is_measurement){
@@ -215,11 +151,26 @@ void loop() {
 
 			if(abs(ax)>m_ax) m_ax=abs(ax);
 			if(abs(ay)>m_ay) m_ay=abs(ay);
-			if(abs(az-16384)>m_az) m_az=abs(az-16384);
+			if(abs(az-Z_ACC_CONST)>m_az) m_az=abs(az-Z_ACC_CONST);
 			if(abs(gx)>m_gx) m_gx=abs(gx);
 			if(abs(gy)>m_gy) m_gy=abs(gy);
 			if(abs(gz)>m_gz) m_gz=abs(gz);
-
+			
+			
+			
+			av_ax=(float)(av_ax*m_cnt+abs(ax))/(m_cnt+1);
+			av_ay=(float)(av_ay*m_cnt+abs(ay))/(m_cnt+1);
+			av_az=(float)(av_az*m_cnt+abs(az-Z_ACC_CONST))/(m_cnt+1);
+			av_gx=(float)(av_gx*m_cnt+abs(gx))/(m_cnt+1);
+			av_gy=(float)(av_gy*m_cnt+abs(gy))/(m_cnt+1);
+			av_gz=(float)(av_gz*m_cnt+abs(gz))/(m_cnt+1);
+			
+			
+			m_cnt++;
+			
+			if(m_cnt%200==0){
+				Serial.print(".");
+			}
 			
 			if(micros()-time>MESUREMENT_TIME*1000000){
 				is_measurement=false;
@@ -230,16 +181,14 @@ void loop() {
 		esc.writeMicroseconds(MOTOR_STOP);
 
 		Serial.println("");
-		Serial.println("Max:");
-		Serial.print(m_ax); Serial.print("\t");
-		Serial.print(m_ay); Serial.print("\t");
-		Serial.print(m_az); Serial.print("\t");
-		Serial.print(m_gx); Serial.print("\t");
-		Serial.print(m_gy); Serial.print("\t");
-		Serial.print(m_gy); Serial.print("\t");
-		Serial.println("");
-
+		Serial.println("\tax\tay\taz\tgx\tgy\tgz");
+		Serial.print("Max:\t");
+		serialPrintSix(m_ax,m_ay,m_az,m_gx,m_gy,m_gz,true);
+		Serial.print("Avg:\t");
+		serialPrintSix(av_ax,av_ay,av_az,av_gx,av_gy,av_gz,true);
 		
+		Serial.print("Measurements count: ");
+		Serial.println(m_cnt);
 
 	}
 	
@@ -247,7 +196,7 @@ void loop() {
 }
 
 void startMeasurement(){
-	Serial.println(F("\nSend motor PWM number to start measurement: "));
+	Serial.println(F("\nSend motor PWM number or .(dot) to start measurement: "));
 	serial_content="";
 	while (Serial.available() && Serial.read()); // empty buffer
 	while (!Serial.available());                 // wait for data
@@ -256,13 +205,22 @@ void startMeasurement(){
 		serial_content.concat(serial_character);
 	}
 	if(serial_content!=""){
-		Serial.println(serial_content);
-		motor_pwm=serial_content.toInt();
+		if(serial_content!="."){
+			Serial.print("Starting motor at: ");
+			Serial.println(serial_content);
+			motor_pwm=serial_content.toInt();
+		}else{
+			Serial.print("Starting motor at: ");
+			Serial.println(MOTOR_SPIN);
+			motor_pwm=MOTOR_SPIN;
+		}
 	}
 
 	esc.writeMicroseconds(motor_pwm);
 
-	delay(3000);
+	Serial.println("Spin up...");
+	delay(MOTOR_SPIN_UP_TIME*1000);
+	
 
 	m_ax=0;
 	m_ay=0;
@@ -274,10 +232,14 @@ void startMeasurement(){
 	m_cnt=0;
 
 	is_measurement=true;
+	
+	Serial.print("Measuring ");
+	Serial.print(MESUREMENT_TIME);
+	Serial.println(" seconds...");
 
 }
 
-void serialPrintSix(int16_t lax,int16_t lay,int16_t laz,int16_t lgx,int16_t lgy,int16_t lgz,bool lln=false){
+void serialPrintSix(int16_t lax,int16_t lay,int16_t laz,int16_t lgx,int16_t lgy,int16_t lgz,bool lln){
 
 	Serial.print(lax); Serial.print("\t");
 	Serial.print(lay); Serial.print("\t");
@@ -333,8 +295,53 @@ void countRounds(){
 	}else{
 		rgz=rgz+(gz-rgz)/100;
 	}
+}
+
+void calibrate(){
+	time=micros();
+	
+	Serial.println("");
+	Serial.print("Calibrating");
+	cnt=0;
+	while(is_calibration){
+
+		// read raw accel/gyro measurements from device
+		accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+		sax=sax+ax;
+		say=say+ay;
+		saz=saz+az;
+		sgx=sgx+gx;
+		sgy=sgy+gy;
+		sgz=sgz+gz;
+
+		if(cnt%200==0){
+			Serial.print(".");
+		}
+		
+		
+		if(micros()-time>CALIBRATION_TIME*1000000){
+			is_calibration=false;
+		}
+		cnt++;
+	}
 	
 	
+	cax=-1*sax/cnt/8.71;
+	cay=-1*say/cnt/9.03;
+	caz=(Z_ACC_CONST-saz/cnt)/8.52;
+	cgx=-1*sgx/cnt/3.34;
+	cgy=-1*sgy/cnt/4.11;
+	cgz=-1*sgz/cnt/4.05;
 	
+	Serial.println("");
+	Serial.println("Calibrations:");
+	serialPrintSix(cax,cay,caz,cgx,cgy,cgz,true);
 	
+	accelgyro.setXAccelOffset(cax);
+	accelgyro.setYAccelOffset(cay);
+	accelgyro.setZAccelOffset(caz);
+	accelgyro.setXGyroOffset(cgx);
+	accelgyro.setYGyroOffset(cgy);
+	accelgyro.setZGyroOffset(cgz);	
 }
