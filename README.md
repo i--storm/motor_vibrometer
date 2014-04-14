@@ -45,7 +45,7 @@ Max:	228	264	424	52	50	46
 Avg:	58	106	101	11	11	10	
 Measurements count: 2275
 </pre></li>
-<li>As for balancing tecnique, I use next algorithm:
+<li>As for balancing tecnique, I use next algorithm:<br>
   1. measure vibrations on bare motor with prop<br>
   2. apply zip tie on motor and run one more test<br>
   3. move zip tie at 1/3 or turnover and measure once more<br>
