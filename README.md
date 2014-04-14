@@ -9,7 +9,9 @@ Project requires [i2cdevlib](https://github.com/jrowberg/i2cdevlib) installed<br
 <h2>HowTo</h2>
 To measure vibrations you should follow this steps:<br>
 <br>
-1. Open sketch in Arduino<br>
+<ol>
+<li>Open sketch in Arduino</li>
+</ol>
 2. Flash it into the board<br>
 3. Attach board to bow with motor we testing with zip tie<br>
 4. Plug motor ESC to PIN9 of board<br>
