@@ -2,9 +2,9 @@ Motor Vibrometer
 ================
 
 Project is intended to help in dynamic balancing of copter motors with props.<br>
-There are huge of ways to measure vibrations produced by motor. Begining from sencing it by hand, ending laser method. I suggest to use flight controller features to measure vibrations and show it in clear numbers for comparison.<br>
+There are huge of ways to measure vibrations produced by motor. Beginning from sensing it by hand, ending laser method. I suggest to use flight controller features to measure vibrations and show it in clear numbers for comparison.<br>
 Project was developed and tested on MultiWii Micro board. But should work on any Atmega328 board with BMA6050 I2C sensor.<br>
-You may use flight controller installed on your copter. But since they are (in most cases) damped, measurements will be less indicative. I advice to use separate flight controller or arduino board with BMA6050 sensor.<br>
+You may use flight controller installed on your copter. But since they are (in most cases) damped, measurements will be less indicative. I advice to use separate flight controller or Arduino board with BMA6050 sensor.<br>
 Project requires [i2cdevlib](https://github.com/jrowberg/i2cdevlib) installed<br>
 <h2>HowTo</h2>
 To measure vibrations you should follow this steps:<br>
@@ -32,7 +32,7 @@ Calibrations:
 Send motor PWM number or .(dot) to start measurement:
 </pre></li>
 <li>After calibration you can start measurements</li>
-<li>Send PWM timing an number to board (from 1000 to 2000), or .(dot) to use 1200. btw. I've chosen this value as most effective for measurements. Keep in ming that greater values will make your copter fly and you vill have extra vibrations in z-axis. I've found that it most convinient to put copter on table and make measured bow, with motor, ouside the edge of the table./li>
+<li>Send PWM timing an number to board (from 1000 to 2000), or .(dot) to use 1200. btw. I've chosen this value as most effective for measurements. Keep in ming that greater values will make your copter fly and you vill have extra vibrations in z-axis. I've found that it most convenient to put copter on table and make measured bow, with motor, outside the edge of the table./li>
 <li>Vibrometer will spin up motor, and measure vibrations (6 sec. by default)</li>
 <li>After measurement you will see the results:<br>
 <pre>
@@ -45,7 +45,7 @@ Max:	228	264	424	52	50	46
 Avg:	58	106	101	11	11	10	
 Measurements count: 2275
 </pre></li>
-<li>As for balancing tecnique, I use next algorithm:<br>
+<li>As for balancing technique, I use next algorithm:<br>
   1. measure vibrations on bare motor with prop<br>
   2. apply zip tie on motor and run one more test<br>
   3. move zip tie at 1/3 or turnover and measure once more<br>
