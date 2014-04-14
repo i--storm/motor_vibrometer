@@ -1,10 +1,12 @@
 Motor Vibrometer
 ================
 
-Measures vibrations of copter motor<br>
+Project is intended to help in dynamic balancing of copter motors with props.<br>
+There are guge of ways to measure vibrations prodiced by motor. Begining from sencing it by hand, ending laser method. I suppose to use flight controller features to mesure vibrations and show it in clear numbers for comparison.<br>
 Project requres [i2cdevlib](https://github.com/jrowberg/i2cdevlib) installed<br>
 <br>
 Project was developed and tested on MultiWii Micro board. But should work on any Atmega328 board with BMA6050 I2C sensor.<br>
+You may use flight controller installed on your copter. But since they are (in most cases) damped, measurements will be less indicative. I advice to use separate flight controller or arduino board with BMA6050 sensor.
 <br>
 To measure vibrations you should follow this steps:<br>
 <br>
