@@ -27,7 +27,7 @@ To measure vibrations you should follow this steps:<br>
   2. apply zip tie on motor and run one more test
   3. move zip tie at 1/3 or turnover and measure once more
   4. move zip tie again at 1/3 and measure last time
-  5. now you have 4 veasurements to compare and chhose the best
+  5. now you have 4 measurements to compare and chhose the best
   6. recheck best position and remove tie
   7. don't forget tie lock position
   8. apply little pierce of scotch to the place of lock
