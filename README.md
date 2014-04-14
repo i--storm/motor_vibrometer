@@ -30,6 +30,7 @@ Calibrations:
 
 Send motor PWM number or .(dot) to start measurement:
 </pre>
+
 10. After calibration you can start measurements<br>
 11. Send PWM timing an number to board (from 1000 to 2000), or .(dot) to use 1200. btw. I've chosen this value as most effective for measurements. Keep in ming that greater values will make your copter fly and you vill have extra vibrations in z-axis. I've found that it most convinient to put copter on table and make measured bow, with motor, ouside the edge of the table. <br>
 12. Vibrometer will spin up motor, and measure vibrations (6 sec. by default)<br>
