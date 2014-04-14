@@ -46,17 +46,17 @@ Avg:	58	106	101	11	11	10
 Measurements count: 2275
 </pre></li>
 <li>As for balancing tecnique, I use next algorithm:
-  1. measure vibrations on bare motor with prop
-  2. apply zip tie on motor and run one more test
-  3. move zip tie at 1/3 or turnover and measure once more
-  4. move zip tie again at 1/3 and measure last time
-  5. now you have 4 measurements to compare and choose the best
-  6. recheck best position and remove tie
-  7. don't forget tie lock position
-  8. apply little pierce of metallic adhesive tape to the place of lock
-  9. remeasure
-  10. keep going 8-9 while vibrations are reducing
-  11. you have balanced motor!!
+  1. measure vibrations on bare motor with prop<br>
+  2. apply zip tie on motor and run one more test<br>
+  3. move zip tie at 1/3 or turnover and measure once more<br>
+  4. move zip tie again at 1/3 and measure last time<br>
+  5. now you have 4 measurements to compare and choose the best<br>
+  6. recheck best position and remove tie<br>
+  7. don't forget tie lock position<br>
+  8. apply little pierce of metallic adhesive tape to the place of lock<br>
+  9. remeasure<br>
+  10. keep going 8-9 while vibrations are reducing<br>
+  11. you have balanced motor!!<br>
 </li>
 
 
