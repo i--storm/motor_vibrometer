@@ -12,7 +12,7 @@ To measure vibrations you should follow this steps:<br>
 2. Flash it into the board<br>
 3. Attach board to bow with motor we testing with zip tie<br>
 4. Plug motor ESC to PIN9 of board<br>
-5. Power plug power battery to ESC<br>
+5. Plug power battery to ESC<br>
 5. Plug USB cable to PC and open Arduino Port Monitor and connect it to COM port of your board<br>
 6. Check that all cables and components are safe from prop blades. <br>
 7. In Port Monitor, send any symbol to begin calibration process.<br>
