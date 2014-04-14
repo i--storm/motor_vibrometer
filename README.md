@@ -19,7 +19,7 @@ To measure vibrations you should follow this steps:<br>
 7. In Port Monitor, send any symbol to begin calibration process.<br>
 8. Board should be still while calibrating.<br>
 9. You will see something like this it Port Monitor window:<br>
-  <pre>
+<pre>
 Initializing I2C devices...
 Testing device connections...
 MPU6050 connection successful
@@ -27,11 +27,23 @@ MPU6050 connection successful
 Calibrating.............
 Calibrations:
 -1251	-1109	1132	10	23	-11
-  </pre>
+
+Send motor PWM number or .(dot) to start measurement:
+</pre>
 10. After calibration you can start measurements<br>
 11. Send PWM timing an number to board (from 1000 to 2000), or .(dot) to use 1200. btw. I've chosen this value as most effective for measurements. Keep in ming that greater values will make your copter fly and you vill have extra vibrations in z-axis. I've found that it most convinient to put copter on table and make measured bow, with motor, ouside the edge of the table. <br>
 12. Vibrometer will spin up motor, and measure vibrations (6 sec. by default)<br>
 13. After measurement you will see the results:<br>
+<pre>
+Starting motor at: 1200
+Spin up...
+Measuring 5 seconds...
+...........
+	ax	ay	az	gx	gy	gz
+Max:	228	264	424	52	50	46	
+Avg:	58	106	101	11	11	10	
+Measurements count: 2275
+</pre>
 14. As for balancing tecnique, I use next algorithm:<br>
   1. measure vibrations on bare motor with prop
   2. apply zip tie on motor and run one more test
